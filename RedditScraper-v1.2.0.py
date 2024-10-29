@@ -1,5 +1,6 @@
 import praw
 import os
+import csv
 
 # Create a Reddit instance
 reddit = praw.Reddit(
@@ -27,19 +28,25 @@ def fetch_posts(subreddit, limit=1000):
     return posts
 
 # Fetch the posts
-posts = fetch_posts(subreddit, limit=100)
+posts = fetch_posts(subreddit, limit=1000)
 
-# Save posts to a file
-output_file = "problem_gambling_posts.txt"
+# Save posts to a CSV file
+output_file = "problem_gambling_posts.csv"
 
-with open(output_file, 'w', encoding='utf-8') as f:
+# Write to CSV with the required headers
+with open(output_file, 'w', newline='', encoding='utf-8') as csvfile:
+    fieldnames = ['Title', 'Text', 'URL', 'Score', 'Comments', 'Created']
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+    writer.writeheader()  # Write the header row
     for post in posts:
-        f.write(f"Title: {post['title']}\n")
-        f.write(f"Text: {post['text']}\n")
-        f.write(f"URL: {post['url']}\n")
-        f.write(f"Score: {post['score']}\n")
-        f.write(f"Comments: {post['num_comments']}\n")
-        f.write(f"Created: {post['created_utc']}\n")
-        f.write("="*40 + "\n")
+        writer.writerow({
+            'Title': post['title'],
+            'Text': post['text'],
+            'URL': post['url'],
+            'Score': post['score'],
+            'Comments': post['num_comments'],
+            'Created': post['created_utc']
+        })
 
 print(f"Fetched and saved {len(posts)} posts to {output_file}")
